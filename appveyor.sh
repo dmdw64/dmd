@@ -1,0 +1,63 @@
+#!/bin/sh
+
+set -e -v
+
+clone() {
+    local url="$1"
+    local path="$2"
+    local branch="$3"
+    for i in {0..4}; do
+        if git clone --branch "$branch" "$url" "$path" "${@:4}"; then
+            break
+        elif [ $i -lt 4 ]; then
+            sleep $((1 << $i))
+        else
+            echo "Failed to clone: ${url}"
+            exit 1
+        fi
+    done
+}
+
+echo "C_COMPILER: $C_COMPILER"
+echo "D_COMPILER: $D_COMPILER"
+echo "D_VERSION: $D_VERSION"
+
+cd /c/projects/
+
+if [ $D_COMPILER == "dmd" ]; then
+    appveyor DownloadFile "http://downloads.dlang.org/releases/2.x/${D_VERSION}/dmd.${D_VERSION}.windows.7z" -FileName dmd2.7z
+    7z x dmd2.7z > /dev/null
+    export PATH=$PWD/dmd2/windows/bin/:$PATH
+    export DMD=/c/projects/dmd2/windows/bin/dmd.exe
+    dmd --version
+fi
+
+for proj in druntime phobos; do
+    if [ $APPVEYOR_REPO_BRANCH != master ] && [ $APPVEYOR_REPO_BRANCH != stable ] &&
+            ! git ls-remote --exit-code --heads https://github.com/dlang/$proj.git $APPVEYOR_REPO_BRANCH > /dev/null; then
+        # use master as fallback for other repos to test feature branches
+        clone https://github.com/dlang/$proj.git $proj master
+    else
+        clone https://github.com/dlang/$proj.git $proj $APPVEYOR_REPO_BRANCH
+    fi
+done
+
+cd /c/projects/dmd/src
+make -f win64.mak reldmd DMD=../src/dmd
+
+cd /c/projects/druntime
+make -f win64.mak DMD=../dmd/src/dmd
+
+cd /c/projects/phobos
+make -f win64.mak DMD=../dmd/src/dmd
+
+cp /c/projects/phobos/phobos64.lib /c/projects/dmd/
+
+export OS="Win_64"
+export CC='c:/"Program Files (x86)"/"Microsoft Visual Studio 14.0"/VC/bin/amd64/cl.exe'
+export MODEL="64"
+export MODEL_FLAG="-m64"
+
+cd /c/projects/dmd/test
+../../make/make -j3 all MODEL=$MODEL MODEL_FLAG=$MODEL_FLAG LIB="../../phobos;$LIB"
+
