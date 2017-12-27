@@ -28,16 +28,13 @@
 #pragma warning(disable:4510) // 'CommaExp' : default constructor could not be generated
 #pragma warning(disable:4512) // 'CommaExp' : assignment operator could not be generated
 #pragma warning(disable:4610) // class 'CommaExp' can never be instantiated - user defined constructor required
+#pragma warning(disable:4838) // requires a narrowing conversion
+#pragma warning(disable:4577) // 'noexcept' used with no exception handling mode specified
+#pragma warning(disable:4805) // '|': unsafe mix of types in operation
 
 #ifdef _WIN64
 #pragma warning(disable:4366) // The result of the unary '&' operator may be unaligned
 #pragma warning(disable:4267) // conversion from 'size_t' to 'unsigned int', possible loss of data
-#pragma warning(disable:4310) // cast truncates constant value
-#pragma warning(disable:4838) // requires a narrowing conversion
-#pragma warning(disable:4577) // 'noexcept' used with no exception handling mode specified
-#pragma warning(disable:4805) // '|': unsafe mix of types in operation
-#pragma warning(disable:4311) // type case: pointer truncation
-#pragma warning(disable:4312) // type case: conversion from 'unsigned int' to 'void *' of greater size
 #endif
 
 #define LITTLE_ENDIAN 1
