@@ -60,5 +60,5 @@ export MODEL="64"
 export MODEL_FLAG="-m64"
 
 cd /c/projects/dmd/test
-../../make/make all MODEL=$MODEL MODEL_FLAG=$MODEL_FLAG LIB="../../phobos;$LIB"
+../../make/make -j2 all MODEL=$MODEL MODEL_FLAG=$MODEL_FLAG LIB="../../phobos;$LIB"
 
